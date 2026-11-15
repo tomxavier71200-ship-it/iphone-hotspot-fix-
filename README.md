@@ -4,6 +4,17 @@ Custom Windows USB tethering monitor and native iPhone companion. Plug iPhone in
 
 **An ordinary iPhone app cannot force Personal Hotspot to stay enabled or guarantee uninterrupted internet.** This project provides diagnostics and best-effort reconnection. Connection switches can interrupt calls and downloads.
 
+
+## Add to LiveContainer Sources
+
+In LiveContainer, open **Sources → +** and paste this catalog URL:
+
+```text
+https://raw.githubusercontent.com/tomxavier71200-ship-it/iphone-hotspot-fix-/main/source.json
+```
+
+The catalog downloads the IPA directly from the public v1.0 release, without a GitHub login or an expiring Actions artifact link. iOS 17+ is required. The JSON format and IPA download have been validated; running inside LiveContainer has not been tested on a physical iPhone. The iPhone app is a diagnostic companion; it cannot control Personal Hotspot or boost cellular speed.
+
 ## Download builds from GitHub
 
 1. Open this repository's **Actions** tab and select the latest successful **Build TetherGuard** run.

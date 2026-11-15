@@ -1,0 +1,43 @@
+{
+  "name": "TetherGuard",
+  "identifier": "com.tetherguard.source",
+  "subtitle": "iPhone USB tethering companion",
+  "description": "iPhone network and battery diagnostics, a manual internet test, and USB tethering setup guidance. The Windows helper handles USB route and traffic monitoring. Cannot force Personal Hotspot to stay on or increase cellular speed.",
+  "website": "https://github.com/tomxavier71200-ship-it/iphone-hotspot-fix-",
+  "tintColor": "#123E3B",
+  "iconURL": "https://raw.githubusercontent.com/tomxavier71200-ship-it/iphone-hotspot-fix-/main/iphone/TetherGuard/Assets.xcassets/AppIcon.appiconset/AppIcon.png",
+  "apps": [
+    {
+      "name": "TetherGuard",
+      "bundleIdentifier": "com.tetherguard.companion",
+      "developerName": "tomxavier71200-ship-it",
+      "subtitle": "USB tethering diagnostics",
+      "localizedDescription": "iPhone network and battery diagnostics, a manual internet test, and USB tethering setup guidance. The Windows helper handles USB route and traffic monitoring. Cannot force Personal Hotspot to stay on or increase cellular speed.",
+      "iconURL": "https://raw.githubusercontent.com/tomxavier71200-ship-it/iphone-hotspot-fix-/main/iphone/TetherGuard/Assets.xcassets/AppIcon.appiconset/AppIcon.png",
+      "tintColor": "#123E3B",
+      "category": "utilities",
+      "version": "1.0",
+      "versionDate": "2026-11-15T00:00:00Z",
+      "versionDescription": "Initial USB-focused companion. Unsigned IPA; physical LiveContainer compatibility not yet tested.",
+      "downloadURL": "https://github.com/tomxavier71200-ship-it/iphone-hotspot-fix-/releases/download/v1.0/TetherGuard.ipa",
+      "size": 89468,
+      "minOSVersion": "17.0",
+      "versions": [
+        {
+          "version": "1.0",
+          "buildVersion": "1",
+          "date": "2026-11-15T00:00:00Z",
+          "downloadURL": "https://github.com/tomxavier71200-ship-it/iphone-hotspot-fix-/releases/download/v1.0/TetherGuard.ipa",
+          "size": 89468,
+          "minOSVersion": "17.0",
+          "localizedDescription": "Initial USB-focused companion. Unsigned IPA; physical LiveContainer compatibility not yet tested."
+        }
+      ],
+      "appPermissions": {
+        "entitlements": [],
+        "privacy": {}
+      }
+    }
+  ],
+  "news": []
+}
