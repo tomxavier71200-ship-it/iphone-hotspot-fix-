@@ -18,7 +18,7 @@ struct ContentView: View {
                     .padding(.vertical, 12)
                 }
 
-                Section("This iPhone") {
+                Section {
                     LabeledContent("Network path", value: diagnostics.network)
                     LabeledContent("Battery", value: diagnostics.battery)
                     VStack(alignment: .leading, spacing: 8) {
@@ -37,6 +37,8 @@ struct ContentView: View {
                             else { Image(systemName: "arrow.up.arrow.down") }
                         }
                     }.disabled(diagnostics.testing)
+                } header: {
+                    Text("This iPhone")
                 } footer: {
                     Text("These are phone diagnostics. They do not confirm Personal Hotspot status or the Windows connection. Diagnostics refresh while this app is open.")
                 }
