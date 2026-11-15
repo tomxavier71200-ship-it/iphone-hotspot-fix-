@@ -3,20 +3,26 @@
   <ScrollViewer VerticalScrollBarVisibility="Auto">
     <StackPanel Margin="32">
       <TextBlock Text="TETHERGUARD" FontSize="12" FontWeight="Bold" Foreground="#34746A"/>
-      <TextBlock Text="A steadier connection." FontSize="32" FontWeight="SemiBold" Margin="0,8,0,6"/>
-      <TextBlock Text="USB first. Wi-Fi recovery when your iPhone hotspot is available." Foreground="#566C73" Margin="0,0,0,24"/>
+      <TextBlock Text="Wired to your iPhone." FontSize="32" FontWeight="SemiBold" Margin="0,8,0,6"/>
+      <TextBlock Text="Watch your USB internet connection, live traffic and interruptions." Foreground="#566C73" Margin="0,0,0,24"/>
       <Border Background="White" CornerRadius="14" Padding="22" Margin="0,0,0,20">
         <StackPanel>
           <TextBlock x:Name="StatusText" Text="Ready to set up" FontSize="25" FontWeight="SemiBold"/>
           <TextBlock x:Name="RouteText" Text="Select your iPhone USB adapter and saved Wi-Fi profile below." Margin="0,8,0,0"/>
           <TextBlock x:Name="DetailText" Text="Monitoring is stopped." Foreground="#566C73" Margin="0,8,0,0"/>
           <TextBlock x:Name="OutageText" Text="No recorded outage" Foreground="#566C73" Margin="0,8,0,0"/>
+          <TextBlock x:Name="TrafficText" Text="USB traffic appears when monitoring starts." FontWeight="SemiBold" Margin="0,14,0,0"/>
+          <TextBlock Text="Live traffic reflects your current activity, not the maximum speed available." FontSize="12" Foreground="#566C73" Margin="0,4,0,0"/>
         </StackPanel>
       </Border>
-      <TextBlock Text="1  iPhone USB network adapter" FontWeight="SemiBold"/>
+      <TextBlock Text="iPhone USB network adapter" FontWeight="SemiBold"/>
       <ComboBox x:Name="UsbCombo" DisplayMemberPath="Label" AutomationProperties.Name="iPhone USB network adapter"/>
-      <TextBlock Text="2  Saved iPhone hotspot Wi-Fi profile" FontWeight="SemiBold"/>
-      <ComboBox x:Name="WifiCombo" DisplayMemberPath="Label" AutomationProperties.Name="Saved iPhone hotspot Wi-Fi profile"/>
+      <CheckBox x:Name="AwakeCheck" IsChecked="True" Content="Keep this PC awake while monitoring" Margin="0,0,0,8"/>
+      <TextBlock Text="The display can turn off. Stop releases this request. Manual sleep and closing the laptop lid can still suspend the PC." FontSize="12" Foreground="#566C73" Margin="0,0,0,16"/>
+      <Expander Header="Optional Wi-Fi fallback" Margin="0,0,0,16">
+        <StackPanel><TextBlock Text="Leave unselected for a cable-only session. No Wi-Fi connection changes are made unless you select a saved profile." Margin="0,8,0,0"/>
+        <ComboBox x:Name="WifiCombo" DisplayMemberPath="Label" AutomationProperties.Name="Optional saved iPhone hotspot Wi-Fi profile"/></StackPanel>
+      </Expander>
       <WrapPanel Margin="0,0,0,16">
         <Button x:Name="StartButton" Content="Start monitoring" Click="StartClick" Background="#D7EEE6"/>
         <Button x:Name="StopButton" Content="Stop" Click="StopClick" IsEnabled="False"/>
@@ -26,8 +32,9 @@
       <Border BorderBrush="#D5DFDC" BorderThickness="1" CornerRadius="10" Padding="16">
         <StackPanel>
           <TextBlock Text="Before you start" FontWeight="SemiBold" Margin="0,0,0,8"/>
-          <TextBlock Text="Install Apple Devices on Windows. Enable Personal Hotspot → Allow Others to Join on iPhone. Connect a data-capable USB cable and tap Trust. Join the hotspot once using Windows Wi-Fi to save its profile."/>
-          <TextBlock Text="Windows chooses the route. TetherGuard does not change route priorities or keep your PC awake. Connection switching can interrupt calls and downloads. An iPhone app cannot force Personal Hotspot to stay on." Foreground="#566C73" Margin="0,10,0,0"/>
+          <TextBlock Text="Install Apple Devices on Windows. Enable Personal Hotspot → Allow Others to Join on iPhone. Connect a data-capable USB cable directly to the PC and tap Trust. Select the Apple Mobile Device Ethernet adapter above."/>
+          <TextBlock Text="If the status says another route, Windows is using a different network or VPN. Disconnect competing networks yourself if you want to verify cable-only internet. TetherGuard does not change routing priorities." Foreground="#566C73" Margin="0,10,0,0"/>
+          <TextBlock Text="For the best available performance, maintain a good cellular signal, keep iPhone cool, and check your carrier's tethering allowance. This app cannot increase cellular capacity, bypass carrier limits or force Personal Hotspot to stay on." Foreground="#566C73" Margin="0,10,0,0"/>
           <TextBlock Text="Checks contact Microsoft and Apple every 15 seconds while monitoring. Settings and diagnostic logs stay on this PC." Foreground="#566C73" Margin="0,10,0,0"/>
         </StackPanel>
       </Border>

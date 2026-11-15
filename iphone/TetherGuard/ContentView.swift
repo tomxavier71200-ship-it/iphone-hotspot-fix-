@@ -10,9 +10,9 @@ struct ContentView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Label("YOUR CONNECTION COMPANION", systemImage: "personalhotspot")
                             .font(.caption.weight(.semibold)).foregroundStyle(.tint)
-                        Text("Stay connected.")
+                        Text("Connect by cable.")
                             .font(.largeTitle.bold())
-                        Text("Use USB for tethering. Let the Windows helper watch for outages and attempt Wi-Fi recovery.")
+                        Text("Share your cellular internet over USB. The Windows helper verifies the route, shows live USB traffic and watches for interruptions.")
                             .foregroundStyle(.secondary)
                     }
                     .padding(.vertical, 12)
@@ -46,20 +46,20 @@ struct ContentView: View {
                 Section("Set up tethering") {
                     step(1, "Prepare Windows", "Install Apple Devices, then connect a USB cable that supports data.")
                     step(2, "Enable Personal Hotspot", "In Settings → Personal Hotspot, turn on Allow Others to Join. Unlock iPhone and tap Trust if prompted.")
-                    step(3, "Save your Wi-Fi fallback", "Join this iPhone’s hotspot once from Windows Wi-Fi. Windows saves the profile and password.")
-                    step(4, "Start the Windows helper", "Select the iPhone USB adapter and saved hotspot profile, then start monitoring. The helper runs in the system tray.")
+                    step(3, "Give cellular a good connection", "Keep iPhone cool, place it where cellular reception is good, and check that your carrier plan supports tethering. Connect directly to the PC when possible.")
+                    step(4, "Start the Windows helper", "Select the Apple Mobile Device Ethernet adapter and start monitoring. Keep PC awake can help prevent automatic Windows sleep during your session.")
                 }
 
                 Section("If the connection drops") {
                     Label("Check cellular service and your data allowance.", systemImage: "antenna.radiowaves.left.and.right")
                     Label("Reconnect USB, unlock iPhone and check for a Trust prompt.", systemImage: "cable.connector")
                     Label("Check Allow Others to Join if Wi-Fi fallback cannot connect.", systemImage: "personalhotspot")
-                    Label("Keep Windows awake while you need tethering.", systemImage: "desktopcomputer")
+                    Label("Use Keep PC awake in the Windows helper during a USB session.", systemImage: "desktopcomputer")
                 }
 
                 Section("What to expect") {
                     Text("iOS controls Personal Hotspot. This app cannot switch it on, override idle behavior, or guarantee uninterrupted tethering. The Windows helper can reconnect only when the hotspot is available.")
-                    Text("A switch between USB and Wi-Fi may interrupt an active call or download. Windows controls which connection it uses.")
+                    Text("Your maximum speed depends on cellular reception, network load, your carrier plan and the USB connection. This app cannot boost cellular capacity or bypass limits. Windows controls which internet connection it uses.")
                 }
 
                 Section("Privacy") {

@@ -34,7 +34,7 @@ Use a physical iPhone for battery readings, cellular and tethering validation. N
 
 `TetherGuard.Core` contains a clock-driven recovery policy with no platform dependencies. `TetherGuard.Tests` exercises failures, retries, recovery, Stop and restart without sleeping or network mutation.
 
-The WPF app owns a single cancelable monitor loop. Network-change events wake that loop; they do not create parallel checks. Stop cancels and awaits its completion. A local named mutex prevents duplicate interactive instances.
+The WPF app owns a single cancelable monitor loop. Network-change events wake that loop; they do not create parallel checks. Stop cancels and awaits its completion. A local named mutex prevents duplicate interactive instances. USB traffic is sampled from adapter counters using monotonic elapsed time, with baselines reset after disconnects/counter resets. The visible keep-awake option holds a UI-thread `SetThreadExecutionState` system request only during the session, releasing it on Stop/Exit; it does not keep the screen on or prevent manual sleep.
 
 Internet verification uses a new direct socket for each test, checks the HTTPS response, and maps the successful socket's actual local IP to a network adapter. It does not infer internet availability from link status. WLAN interop enumerates saved profiles and calls `WlanConnect` in profile mode; a successful return means only that Windows accepted the request. A later probe establishes internet access. No credentials are read.
 

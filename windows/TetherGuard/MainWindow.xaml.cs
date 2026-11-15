@@ -19,6 +19,10 @@ namespace TetherGuard;
 public partial class MainWindow : Window
 {
     private readonly RecoveryPolicy policy = new();
+    private readonly TrafficSampler traffic = new();
+    private readonly Stopwatch sessionClock = new();
+    private readonly SessionPower sessionPower = new();
+    private Adapter? sessionUsb;
     private readonly ObservableCollection<string> activity = new();
     private readonly SemaphoreSlim networkSignal = new(0, 1);
     private readonly Forms.NotifyIcon tray;
@@ -49,7 +53,7 @@ public partial class MainWindow : Window
         Closing += OnClosing;
         NetworkChange.NetworkAddressChanged += NetworkChanged;
         NetworkChange.NetworkAvailabilityChanged += AvailabilityChanged;
-        clock.Tick += (_, _) => UpdateOutage();
+        clock.Tick += (_, _) => { UpdateOutage(); UpdateTraffic(); };
         clock.Start();
         if (smoke) Loaded += SmokeLoaded;
     }
@@ -76,7 +80,8 @@ public partial class MainWindow : Window
             {
                 wlan = new Wlan();
                 WifiCombo.ItemsSource = wlan.Profiles();
-                WifiCombo.SelectedItem = WifiCombo.Items.Cast<WifiProfile>().FirstOrDefault(p => p.InterfaceId.ToString() == saved.WifiId && p.Name == saved.Profile);
+                // Cable-only is the default on every launch. Fallback requires explicit selection.
+                WifiCombo.SelectedItem = null;
             }
             catch (Win32Exception e)
             {
@@ -98,18 +103,23 @@ public partial class MainWindow : Window
         if (monitoring is not null || stopping) return;
         var usb = UsbCombo.SelectedItem as Adapter;
         var wifi = WifiCombo.SelectedItem as WifiProfile;
-        if (usb is null && wifi is null)
+        if (usb is null)
         {
-            SetupText.Text = "Select your iPhone USB adapter or a saved hotspot Wi-Fi profile before starting.";
+            SetupText.Text = "Connect and trust your iPhone, refresh devices, and select its USB network adapter before starting.";
             return;
         }
         try { if (!smoke) Storage.Save(Selection()); }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException)
         { SetupText.Text = "Settings could not be saved: " + error.Message; return; }
-        UsbCombo.IsEnabled = WifiCombo.IsEnabled = RefreshButton.IsEnabled = StartButton.IsEnabled = false;
+        UsbCombo.IsEnabled = WifiCombo.IsEnabled = RefreshButton.IsEnabled = StartButton.IsEnabled = AwakeCheck.IsEnabled = false;
         StopButton.IsEnabled = true;
         cancellation = new();
         policy.Start();
+        sessionUsb = usb;
+        traffic.Reset();
+        sessionClock.Restart();
+        if (!smoke && AwakeCheck.IsChecked == true)
+            Log(sessionPower.Acquire() ? "Requested protection from automatic PC sleep for this session." : "Windows could not apply the keep-awake request.");
         lastCheck = null;
         lastState = "";
         StatusText.Text = "Checking connection…";
@@ -203,6 +213,28 @@ public partial class MainWindow : Window
     }
     private void NetworkChanged(object? sender, EventArgs e) => SignalNetwork();
     private void AvailabilityChanged(object? sender, NetworkAvailabilityEventArgs e) => SignalNetwork();
+    private void UpdateTraffic()
+    {
+        if (sessionUsb is null || !policy.Running) return;
+        try
+        {
+            var nic = NetworkInterface.GetAllNetworkInterfaces().FirstOrDefault(n => SameId(n.Id, sessionUsb.Id));
+            if (nic is null || nic.OperationalStatus != OperationalStatus.Up)
+            {
+                traffic.Reset();
+                TrafficText.Text = "USB adapter disconnected. Reconnect the cable and check Trust.";
+                return;
+            }
+            var counters = nic.GetIPStatistics();
+            var rate = traffic.Sample(counters.BytesReceived, counters.BytesSent, sessionClock.Elapsed);
+            TrafficText.Text = $"USB traffic  ↓ {rate.DownloadMbps:F2} Mbps   ↑ {rate.UploadMbps:F2} Mbps";
+        }
+        catch (Exception e) when (e is NetworkInformationException or InvalidOperationException)
+        {
+            traffic.Reset();
+            TrafficText.Text = "USB traffic counters are unavailable.";
+        }
+    }
     private async void StopClick(object sender, RoutedEventArgs e) => await StopAsync();
     private async Task StopAsync()
     {
@@ -220,7 +252,11 @@ public partial class MainWindow : Window
             monitoring = null;
             cancellation?.Dispose();
             cancellation = null;
-            UsbCombo.IsEnabled = WifiCombo.IsEnabled = RefreshButton.IsEnabled = StartButton.IsEnabled = true;
+            sessionPower.Dispose();
+            sessionClock.Stop();
+            sessionUsb = null;
+            TrafficText.Text = "USB traffic monitoring stopped.";
+            UsbCombo.IsEnabled = WifiCombo.IsEnabled = RefreshButton.IsEnabled = StartButton.IsEnabled = AwakeCheck.IsEnabled = true;
             StopButton.IsEnabled = false;
             StatusText.Text = "Monitoring stopped";
             DetailText.Text = "No further checks or recovery requests will be sent. A Wi-Fi request already accepted by Windows can still finish.";
@@ -267,7 +303,10 @@ public partial class MainWindow : Window
             encoder.Frames.Add(BitmapFrame.Create(image));
             using (var file = File.Create(Path.Combine(folder, "windows-preview.png"))) encoder.Save(file);
             var probe = await Connectivity.ProbeAsync(CancellationToken.None);
+            using (var powerCheck = new SessionPower())
+                if (!powerCheck.Acquire()) throw new InvalidOperationException("Windows rejected the temporary keep-awake test request.");
             string lifecycle = "not run: no adapter";
+            string trafficCheck = "not run";
             if (UsbCombo.Items.Count > 0)
             {
                 UsbCombo.SelectedItem = UsbCombo.Items.Cast<Adapter>().FirstOrDefault(a => SameId(a.Id, probe.AdapterId ?? "")) ?? UsbCombo.Items[0];
@@ -278,6 +317,10 @@ public partial class MainWindow : Window
                 if (!ReferenceEquals(activeTask, monitoring)) throw new InvalidOperationException("Duplicate Start created another loop.");
                 for (int i = 0; i < 150 && lastCheck is null; i++) await Task.Delay(100);
                 if (lastCheck is null) throw new InvalidOperationException("Monitor did not finish its first check.");
+                UpdateTraffic();
+                trafficCheck = TrafficText.Text;
+                if (!trafficCheck.StartsWith("USB traffic") && !trafficCheck.StartsWith("USB adapter disconnected"))
+                    throw new InvalidOperationException("USB traffic counters could not be read.");
                 await StopAsync();
                 var stoppedAt = lastCheck;
                 SignalNetwork();
@@ -286,7 +329,7 @@ public partial class MainWindow : Window
                     throw new InvalidOperationException("Stop did not quiesce monitoring.");
                 lifecycle = "passed: Start, duplicate Start, initial probe, Stop, network event after Stop; no further checks";
             }
-            File.WriteAllText(Path.Combine(folder, "smoke-test.txt"), $"WPF layout: rendered\nNetwork adapters: {UsbCombo.Items.Count}\nSaved profiles: {WifiCombo.Items.Count}\nWLAN: {wlanError ?? "available"}\nInternet verified: {probe.Online}\nActual outbound adapter: {probe.Route}\nLifecycle: {lifecycle}\nNo recovery requests were issued.\n");
+            File.WriteAllText(Path.Combine(folder, "smoke-test.txt"), $"WPF layout: rendered\nNetwork adapters: {UsbCombo.Items.Count}\nSaved profiles: {WifiCombo.Items.Count}\nWLAN: {wlanError ?? "available"}\nInternet verified: {probe.Online}\nActual outbound adapter: {probe.Route}\nUSB counters: {trafficCheck}\nKeep-awake API: temporary request accepted and disposed\nLifecycle: {lifecycle}\nNo recovery requests were issued.\n");
         }
         catch (Exception error) { Storage.Log("Smoke test failed: " + error); Environment.ExitCode = 1; }
         await ExitAsync();

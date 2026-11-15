@@ -2,6 +2,8 @@
 
 These are manual tests. They have not been performed unless explicitly recorded in `validation/RESULTS.md`. Do not run disruptive tests during important calls/downloads.
 
+USB-only is the default. Also verify that live USB traffic increases during ordinary downloads and falls when idle; zero traffic while idle is not a maximum-speed measurement. Check Keep PC awake during a session and confirm automatic sleep protection is released by Stop/Exit. The feature should not keep the display on or override manual sleep/lid actions. Wi-Fi-specific cases below apply only when that optional fallback is explicitly configured.
+
 1. **USB, locked phone:** select the actual Apple USB adapter, enable monitoring and lock iPhone. Confirm a successful check reports iPhone USB. Leave idle for 30 minutes, then browse/download and review outage logs.
 2. **USB removal with Wi-Fi fallback:** save and select the hotspot profile; unplug USB while internet is otherwise unavailable. After two failed checks, confirm a connection request and verified hotspot Wi-Fi status if iOS advertises the hotspot. Record recovery time and any interrupted session.
 3. **USB return:** reconnect and trust iPhone. Confirm the status accurately reflects the adapter Windows actually uses; do not assume Windows immediately switches back to USB.
