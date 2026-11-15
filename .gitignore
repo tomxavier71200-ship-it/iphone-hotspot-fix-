@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+**/.vs/
+**/xcuserdata/
+**/DerivedData/
+.DS_Store
+build/
+*.ipa
+*.p12
+*.mobileprovision
+xcodebuild.log

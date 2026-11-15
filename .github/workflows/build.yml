@@ -1,0 +1,87 @@
+name: Build TetherGuard
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  iphone:
+    name: iPhone app (unsigned)
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Show Xcode version
+        run: xcodebuild -version
+      - name: Build for iPhone
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project iphone/TetherGuard.xcodeproj \
+            -scheme TetherGuard \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/iphone \
+            CODE_SIGNING_ALLOWED=NO \
+            build | tee xcodebuild.log
+      - name: Package unsigned IPA
+        run: |
+          mkdir -p build/package/Payload
+          ditto build/iphone/Build/Products/Release-iphoneos/TetherGuard.app build/package/Payload/TetherGuard.app
+          (cd build/package && zip -qry ../TetherGuard-unsigned.ipa Payload)
+          shasum -a 256 build/TetherGuard-unsigned.ipa > build/iphone-SHA256SUMS.txt
+          echo 'Unsigned IPA built. Sign or sideload before installing; it cannot be installed directly.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload iPhone download
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: TetherGuard-iPhone-unsigned
+          path: |
+            build/TetherGuard-unsigned.ipa
+            build/iphone-SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload Xcode log
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: iPhone-build-log
+          path: xcodebuild.log
+          retention-days: 7
+
+  windows:
+    name: Windows app and recovery tests
+    runs-on: windows-latest
+    timeout-minutes: 20
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: '1'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          dotnet-version: '10.0.x'
+      - name: Test recovery policy
+        run: dotnet run --project windows/TetherGuard.Tests/TetherGuard.Tests.csproj -c Release
+      - name: Publish self-contained Windows app
+        run: dotnet publish windows/TetherGuard/TetherGuard.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=None -o build/windows
+      - name: Upload Windows download
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: TetherGuard-Windows-x64
+          path: build/windows/TetherGuard.exe
+          if-no-files-found: error
+          retention-days: 14

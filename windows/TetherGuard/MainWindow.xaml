@@ -1,0 +1,39 @@
+<Window x:Class="TetherGuard.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="TetherGuard" Width="730" Height="850" MinWidth="560" MinHeight="650" Background="#F3F6F5" FontFamily="Segoe UI" FontSize="14">
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel Margin="32">
+      <TextBlock Text="TETHERGUARD" FontSize="12" FontWeight="Bold" Foreground="#34746A"/>
+      <TextBlock Text="A steadier connection." FontSize="32" FontWeight="SemiBold" Margin="0,8,0,6"/>
+      <TextBlock Text="USB first. Wi-Fi recovery when your iPhone hotspot is available." Foreground="#566C73" Margin="0,0,0,24"/>
+      <Border Background="White" CornerRadius="14" Padding="22" Margin="0,0,0,20">
+        <StackPanel>
+          <TextBlock x:Name="StatusText" Text="Ready to set up" FontSize="25" FontWeight="SemiBold"/>
+          <TextBlock x:Name="RouteText" Text="Select your iPhone USB adapter and saved Wi-Fi profile below." Margin="0,8,0,0"/>
+          <TextBlock x:Name="DetailText" Text="Monitoring is stopped." Foreground="#566C73" Margin="0,8,0,0"/>
+          <TextBlock x:Name="OutageText" Text="No recorded outage" Foreground="#566C73" Margin="0,8,0,0"/>
+        </StackPanel>
+      </Border>
+      <TextBlock Text="1  iPhone USB network adapter" FontWeight="SemiBold"/>
+      <ComboBox x:Name="UsbCombo" DisplayMemberPath="Label" AutomationProperties.Name="iPhone USB network adapter"/>
+      <TextBlock Text="2  Saved iPhone hotspot Wi-Fi profile" FontWeight="SemiBold"/>
+      <ComboBox x:Name="WifiCombo" DisplayMemberPath="Label" AutomationProperties.Name="Saved iPhone hotspot Wi-Fi profile"/>
+      <WrapPanel Margin="0,0,0,16">
+        <Button x:Name="StartButton" Content="Start monitoring" Click="StartClick" Background="#D7EEE6"/>
+        <Button x:Name="StopButton" Content="Stop" Click="StopClick" IsEnabled="False"/>
+        <Button x:Name="RefreshButton" Content="Refresh devices" Click="RefreshClick"/>
+      </WrapPanel>
+      <TextBlock x:Name="SetupText" Foreground="#566C73" Margin="0,0,0,16"/>
+      <Border BorderBrush="#D5DFDC" BorderThickness="1" CornerRadius="10" Padding="16">
+        <StackPanel>
+          <TextBlock Text="Before you start" FontWeight="SemiBold" Margin="0,0,0,8"/>
+          <TextBlock Text="Install Apple Devices on Windows. Enable Personal Hotspot → Allow Others to Join on iPhone. Connect a data-capable USB cable and tap Trust. Join the hotspot once using Windows Wi-Fi to save its profile."/>
+          <TextBlock Text="Windows chooses the route. TetherGuard does not change route priorities or keep your PC awake. Connection switching can interrupt calls and downloads. An iPhone app cannot force Personal Hotspot to stay on." Foreground="#566C73" Margin="0,10,0,0"/>
+          <TextBlock Text="Checks contact Microsoft and Apple every 15 seconds while monitoring. Settings and diagnostic logs stay on this PC." Foreground="#566C73" Margin="0,10,0,0"/>
+        </StackPanel>
+      </Border>
+      <DockPanel Margin="0,20,0,8"><TextBlock Text="Recent activity" FontWeight="SemiBold" VerticalAlignment="Center"/><Button Content="Open logs" DockPanel.Dock="Right" Click="LogsClick" HorizontalAlignment="Right" Margin="10,0,0,0"/></DockPanel>
+      <ListBox x:Name="ActivityList" Height="140" BorderThickness="0" Background="White" FontSize="12" AutomationProperties.Name="Recent activity"/>
+      <TextBlock Text="Closing this window keeps monitoring in the system tray. Use the tray menu to exit." Foreground="#566C73" Margin="0,14,0,0" FontSize="12"/>
+    </StackPanel>
+  </ScrollViewer>
+</Window>
